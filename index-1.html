@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FokusPenuh">
+<meta name="theme-color" content="#c8ff00">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>FokusPenuh</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #c8ff00;
+    --accent2: #ff6b35;
+    --accent3: #7b61ff;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --danger: #ff4444;
+    --safe: #00d4aa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(123,97,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(200,255,0,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---- BOTTOM NAV ---- */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(17,17,24,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 4px;
+    gap: 4px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn .nav-icon { font-size: 20px; line-height: 1; }
+
+  /* ---- PAGES ---- */
+  .page {
+    position: relative;
+    z-index: 1;
+    display: none;
+    padding: 16px 16px 90px;
+    min-height: 100vh;
+    animation: fadein 0.25s ease;
+  }
+
+  .page.active { display: block; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ---- HEADER ---- */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-top: env(safe-area-inset-top, 8px);
+  }
+
+  .brand-label {
+    font-size: 9px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .page-heading {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .page-heading span { color: var(--accent); }
+
+  #live-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -1px;
+    line-height: 1;
+    text-align: right;
+  }
+
+  #live-date {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-label {
+    font-size: 9px;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* ---- HOME PAGE ---- */
+  .mode-banner {
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid;
+  }
+
+  .mode-banner.day { background: rgba(200,255,0,0.07); border-color: rgba(200,255,0,0.2); }
+  .mode-banner.night { background: rgba(255,68,68,0.08); border-color: rgba(255,68,68,0.3); animation: night-glow 3s ease-in-out infinite; }
+
+  @keyframes night-glow {
+    0%,100% { box-shadow: none; }
+    50% { box-shadow: 0 0 20px rgba(255,68,68,0.12); }
+  }
+
+  .mode-emoji { font-size: 28px; }
+  .mode-title { font-size: 15px; font-weight: 800; margin-bottom: 2px; }
+  .mode-sub { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  /* Alert banner */
+  #alert-banner {
+    background: var(--accent2);
+    color: #000;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 12px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    animation: pulse-banner 1.5s ease-in-out infinite;
+  }
+  #alert-banner.show { display: flex; }
+  @keyframes pulse-banner { 0%,100%{opacity:1} 50%{opacity:0.8} }
+
+  /* Progress row */
+  .progress-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .mini-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .mini-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .mini-label { font-size: 10px; color: var(--muted); }
+
+  /* Quick habits on home */
+  .quick-habits { display: flex; flex-direction: column; gap: 8px; }
+
+  .quick-habit {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .quick-habit.done { background: rgba(0,212,170,0.05); border-color: rgba(0,212,170,0.2); }
+
+  .qh-check {
+    width: 24px; height: 24px;
+    border-radius: 7px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+
+  .quick-habit.done .qh-check { background: var(--safe); border-color: var(--safe); color: #000; }
+
+  .qh-text { font-size: 12px; font-weight: 600; flex: 1; }
+  .quick-habit.done .qh-text { text-decoration: line-through; color: var(--muted); }
+
+  /* ---- TIMER PAGE ---- */
+  .timer-ring-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0 8px;
+  }
+
+  .timer-svg-wrap { position: relative; width: 200px; height: 200px; margin-bottom: 20px; }
+
+  svg.timer-ring { transform: rotate(-90deg); }
+  .tr-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+  .tr-fg {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 565;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke 0.3s;
+  }
+  .tr-fg.break { stroke: var(--safe); }
+
+  .timer-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #timer-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  #timer-label {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .timer-btns { display: flex; gap: 10px; }
+
+  button.btn {
+    padding: 13px 28px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-accent { background: var(--accent); color: #000; }
+  .btn-accent:active { transform: scale(0.97); }
+  .btn-ghost { background: var(--border); color: var(--text); }
+  .btn-ghost:active { transform: scale(0.97); }
+
+  .pomodoro-count {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+    justify-content: center;
+  }
+
+  .pomo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .pomo-dot.done { background: var(--accent); }
+
+  /* Task input */
+  .task-input-wrap {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  input.task-input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    padding: 11px 14px;
+    outline: none;
+  }
+
+  input.task-input:focus { border-color: var(--accent3); }
+  input.task-input::placeholder { color: var(--muted); }
+
+  .task-badge {
+    background: rgba(200,255,0,0.1);
+    border: 1px solid rgba(200,255,0,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  /* ---- SCHEDULE PAGE ---- */
+  .sched-list { list-style: none; }
+
+  .sched-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 11px 12px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    background: var(--card);
+  }
+
+  .sched-item.active {
+    border-color: rgba(200,255,0,0.3);
+    background: rgba(200,255,0,0.05);
+  }
+
+  .sched-item.passed { opacity: 0.4; }
+
+  .si-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 40px;
+    padding-top: 3px;
+  }
+
+  .sched-item.active .si-time { color: var(--accent); }
+
+  .si-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .sched-item.active .si-dot {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: dpulse 1.5s ease-in-out infinite;
+  }
+
+  .sched-item.passed .si-dot { background: var(--safe); }
+  @keyframes dpulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .si-info { flex: 1; }
+  .si-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .si-desc { font-size: 10px; color: var(--muted); line-height: 1.4; }
+
+  .si-tag {
+    font-size: 8px;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+  }
+
+  .tag-focus { background: rgba(123,97,255,0.2); color: var(--accent3); }
+  .tag-break { background: rgba(0,212,170,0.15); color: var(--safe); }
+  .tag-no-hp { background: rgba(255,68,68,0.15); color: var(--danger); }
+  .tag-health { background: rgba(200,255,0,0.12); color: var(--accent); }
+
+  /* ---- RULES PAGE ---- */
+  .rule-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    border-left: 3px solid;
+    background: var(--card);
+    margin-bottom: 10px;
+  }
+
+  .rule-item.strict { border-color: var(--danger); }
+  .rule-item.warn { border-color: var(--accent2); }
+  .rule-item.good { border-color: var(--safe); }
+  .rule-item.tip { border-color: var(--accent3); }
+
+  .rule-icon { font-size: 18px; flex-shrink: 0; }
+  .rule-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .rule-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  .app-rec {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .app-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .app-emoji { font-size: 22px; flex-shrink: 0; }
+  .app-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .app-desc { font-size: 10px; color: var(--muted); }
+  .app-badge {
+    margin-left: auto;
+    font-size: 8px;
+    font-family: 'Space Mono', monospace;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .badge-free { background: rgba(0,212,170,0.15); color: var(--safe); }
+  .badge-paid { background: rgba(255,107,53,0.15); color: var(--accent2); }
+
+  /* Tips */
+  #tip-text {
+    font-size: 14px;
+    line-height: 1.7;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  #tip-src { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  .big-quote {
+    font-size: 60px;
+    font-weight: 800;
+    color: rgba(200,255,0,0.06);
+    line-height: 0.7;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: -6px;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    top: 16px; left: 16px; right: 16px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 12px 16px;
+    z-index: 999;
+    transform: translateY(-80px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 24px rgba(200,255,0,0.15);
+  }
+
+  #toast.show { transform: translateY(0); opacity: 1; }
+  .toast-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .toast-msg { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE: HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="page-header">
+    <div>
+      <div class="brand-label">// Produktivitas</div>
+      <h1 class="page-heading">Fokus<span>Penuh</span></h1>
+    </div>
+    <div>
+      <div id="live-time">00:00</div>
+      <div id="live-date">—</div>
+    </div>
+  </div>
+
+  <div id="alert-banner"><span>🚨</span><span id="alert-text"></span></div>
+
+  <div class="mode-banner day" id="mode-banner">
+    <div class="mode-emoji" id="mode-emoji">☀️</div>
+    <div>
+      <div class="mode-title" id="mode-title">Selamat Pagi!</div>
+      <div class="mode-sub" id="mode-sub">Mulai harimu dengan penuh energi.</div>
+    </div>
+  </div>
+
+  <div class="progress-row">
+    <div class="mini-card">
+      <div class="mini-val" id="habit-pct">0%</div>
+      <div class="mini-label">Kebiasaan</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-val" id="pomo-count-home">0</div>
+      <div class="mini-label">Pomodoro</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">✅ Kebiasaan Hari Ini</div>
+    <div class="quick-habits" id="quick-habits"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE: TIMER ===== -->
+<div class="page" id="page-timer">
+  <div class="page-header" style="padding-top:env(safe-area-inset-top,8px)">
+    <div>
+      <div class="brand-label">// Fokus</div>
+      <h2 class="page-heading">Pomo<span>doro</span></h2>
+    </div>
+  </div>
+
+  <div class="task-input-wrap">
+    <input class="task-input" id="task-input" placeholder="Tugas saat ini..." maxlength="60">
+  </div>
+
+  <div id="task-badge-wrap"></div>
+
+  <div class="timer-ring-wrap">
+    <div class="timer-svg-wrap">
+      <svg class="timer-ring" width="200" height="200" viewBox="0 0 200 200">
+        <circle class="tr-bg" cx="100" cy="100" r="90"/>
+        <circle class="tr-fg" id="timer-ring-fg" cx="100" cy="100" r="90"/>
+      </svg>
+      <div class="timer-center">
+        <div id="timer-display">25:00</div>
+        <div id="timer-label">FOKUS</div>
+      </div>
+    </div>
+
+    <div class="pomodoro-count" id="pomo-dots">
+      <div class="pomo-dot"></div>
+      <div class="pomo-dot"></div>
+      <div class="pomo-dot"></div>
+      <div class="pomo-dot"></div>
+    </div>
+
+    <div class="timer-btns" style="margin-top:20px">
+      <button class="btn btn-accent" id="timer-btn" onclick="toggleTimer()">▶ Mulai</button>
+      <button class="btn btn-ghost" onclick="resetTimer()">↺</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE: SCHEDULE ===== -->
+<div class="page" id="page-schedule">
+  <div class="page-header" style="padding-top:env(safe-area-inset-top,8px)">
+    <div>
+      <div class="brand-label">// Hari Ini</div>
+      <h2 class="page-heading">Jad<span>wal</span></h2>
+    </div>
+    <div id="current-block" style="text-align:right;font-size:11px;color:var(--muted);max-width:120px"></div>
+  </div>
+  <ul class="sched-list" id="sched-list"></ul>
+</div>
+
+<!-- ===== PAGE: RULES ===== -->
+<div class="page" id="page-rules">
+  <div class="page-header" style="padding-top:env(safe-area-inset-top,8px)">
+    <div>
+      <div class="brand-label">// Aturan</div>
+      <h2 class="page-heading">Pro<span>tokol</span></h2>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">💡 Tips Hari Ini</div>
+    <div class="big-quote">"</div>
+    <div id="tip-text">Memuat...</div>
+    <div id="tip-src">—</div>
+    <br>
+    <button class="btn btn-ghost" onclick="nextTip()" style="font-size:11px;padding:9px 16px;width:100%">Tips Berikutnya →</button>
+  </div>
+
+  <div class="rule-item strict">
+    <span class="rule-icon">🚫</span>
+    <div><div class="rule-title">Blokir Sosmed 21:00–08:00</div><div class="rule-desc">Instagram, TikTok, YouTube dilarang malam hari. Gunakan app blocker.</div></div>
+  </div>
+  <div class="rule-item strict">
+    <span class="rule-icon">📵</span>
+    <div><div class="rule-title">HP keluar kamar saat tidur</div><div class="rule-desc">Taruh HP di ruang lain jam 21:30. Beli alarm konvensional.</div></div>
+  </div>
+  <div class="rule-item warn">
+    <span class="rule-icon">🌐</span>
+    <div><div class="rule-title">Browser hanya untuk kerja</div><div class="rule-desc">Pasang StayFocusd/LeechBlock. Batas 15 menit/hari untuk situs distraksi.</div></div>
+  </div>
+  <div class="rule-item warn">
+    <span class="rule-icon">🔕</span>
+    <div><div class="rule-title">Notifikasi OFF saat Pomodoro</div><div class="rule-desc">Aktifkan Do Not Disturb. Hanya telepon darurat yang masuk.</div></div>
+  </div>
+  <div class="rule-item good">
+    <span class="rule-icon">⏰</span>
+    <div><div class="rule-title">Satu tugas per Pomodoro</div><div class="rule-desc">Tulis tugasmu sebelum timer mulai. Jangan multitasking.</div></div>
+  </div>
+  <div class="rule-item tip">
+    <span class="rule-icon">📱</span>
+    <div><div class="rule-title">App Blocker Rekomendasi</div><div class="rule-desc">Android: AppBlock · iOS: Screen Time · PC: Cold Turkey / StayFocusd</div></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="card-label">📦 App Pendukung</div>
+    <div class="app-rec">
+      <div class="app-item"><span class="app-emoji">🔴</span><div><div class="app-name">AppBlock</div><div class="app-desc">Blokir app Android sesuai jadwal</div></div><span class="app-badge badge-free">GRATIS</span></div>
+      <div class="app-item"><span class="app-emoji">🟢</span><div><div class="app-name">Forest</div><div class="app-desc">Pomodoro + anti-HP dengan gamifikasi</div></div><span class="app-badge badge-free">GRATIS</span></div>
+      <div class="app-item"><span class="app-emoji">🟡</span><div><div class="app-name">Todoist</div><div class="app-desc">Task manager terbaik untuk Android</div></div><span class="app-badge badge-free">GRATIS</span></div>
+      <div class="app-item"><span class="app-emoji">🔵</span><div><div class="app-name">StayFocusd</div><div class="app-desc">Blokir situs di Chrome (PC/Android)</div></div><span class="app-badge badge-free">GRATIS</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="goPage('home')">
+    <span class="nav-icon">🏠</span>Beranda
+  </button>
+  <button class="nav-btn" id="nav-timer" onclick="goPage('timer')">
+    <span class="nav-icon">⏱</span>Fokus
+  </button>
+  <button class="nav-btn" id="nav-schedule" onclick="goPage('schedule')">
+    <span class="nav-icon">📅</span>Jadwal
+  </button>
+  <button class="nav-btn" id="nav-rules" onclick="goPage('rules')">
+    <span class="nav-icon">🛡</span>Aturan
+  </button>
+</nav>
+
+<!-- Toast -->
+<div id="toast">
+  <div class="toast-title" id="toast-title">🔔</div>
+  <div class="toast-msg" id="toast-msg"></div>
+</div>
+
+<script>
+// ======== DATA ========
+const SCHEDULE = [
+  { time:'05:00', title:'Bangun Pagi', desc:'Jangan snooze! Langsung bangun', tag:'kesehatan', tagClass:'tag-health' },
+  { time:'05:15', title:'Sholat / Meditasi', desc:'10–15 menit ketenangan batin', tag:'fokus', tagClass:'tag-focus' },
+  { time:'05:30', title:'Olahraga Ringan', desc:'Jalan kaki / stretching 20 menit', tag:'kesehatan', tagClass:'tag-health' },
+  { time:'06:00', title:'Sarapan + Review Tujuan', desc:'Baca tujuan sebelum buka HP', tag:'fokus', tagClass:'tag-focus' },
+  { time:'07:00', title:'Deep Work #1', desc:'Tugas terpenting, HP jauh', tag:'fokus', tagClass:'tag-focus' },
+  { time:'09:00', title:'Istirahat 15 menit', desc:'Berdiri, stretching, minum air', tag:'istirahat', tagClass:'tag-break' },
+  { time:'09:15', title:'Deep Work #2', desc:'Lanjut fokus kerja', tag:'fokus', tagClass:'tag-focus' },
+  { time:'12:00', title:'Makan Siang', desc:'Jauhkan layar 30–60 menit', tag:'istirahat', tagClass:'tag-break' },
+  { time:'13:00', title:'Deep Work #3', desc:'Sesi ketiga pakai Pomodoro', tag:'fokus', tagClass:'tag-focus' },
+  { time:'15:30', title:'Admin & Pesan', desc:'Balas email/chat, hanya sekarang', tag:'istirahat', tagClass:'tag-break' },
+  { time:'16:00', title:'Belajar / Skill', desc:'Buku, kursus, atau latihan baru', tag:'fokus', tagClass:'tag-focus' },
+  { time:'18:00', title:'Olahraga Sore', desc:'Gerak badan, jauhkan HP', tag:'kesehatan', tagClass:'tag-health' },
+  { time:'19:30', title:'Makan Malam', desc:'Makan tanpa layar', tag:'istirahat', tagClass:'tag-break' },
+  { time:'20:00', title:'Review Harian', desc:'Catat pencapaian & rencana besok', tag:'fokus', tagClass:'tag-focus' },
+  { time:'20:30', title:'Winding Down', desc:'Baca fisik / jurnal / ngobrol', tag:'istirahat', tagClass:'tag-break' },
+  { time:'21:00', title:'🚫 Mode Malam Aktif', desc:'Taruh HP, aktifkan Do Not Disturb', tag:'no-hp', tagClass:'tag-no-hp' },
+  { time:'21:30', title:'📵 HP Keluar Kamar', desc:'HP di luar kamar tidur', tag:'no-hp', tagClass:'tag-no-hp' },
+  { time:'22:00', title:'Tidur', desc:'Target 7–8 jam tidur berkualitas', tag:'kesehatan', tagClass:'tag-health' },
+];
+
+const HABITS = [
+  { id:'h1', text:'Bangun sebelum jam 06:00' },
+  { id:'h2', text:'Tidak pegang HP 1 jam pertama' },
+  { id:'h3', text:'Olahraga / gerak aktif' },
+  { id:'h4', text:'Baca buku min. 20 menit' },
+  { id:'h5', text:'Tidak sosmed setelah 21:00' },
+  { id:'h6', text:'Minum air 8 gelas' },
+  { id:'h7', text:'Review tujuan harian' },
+  { id:'h8', text:'Tidur sebelum 23:00' },
+];
+
+const TIPS = [
+  { t:'Otak paling tajam 2–4 jam setelah bangun. Gunakan waktu itu untuk kerja terpentingmu, bukan scrolling.', s:'— Neuroscience Research' },
+  { t:'Setiap kali beralih tugas, butuh ~23 menit untuk kembali fokus. Satu tugas, satu waktu.', s:'— Gloria Mark, UC Irvine' },
+  { t:'Tidur bukan pemborosan — itu saat otak mengkonsolidasi semua yang kamu pelajari hari itu.', s:'— Matthew Walker' },
+  { t:'Lingkungan yang kamu desain jauh lebih kuat dari motivasi. Singkirkan godaan sebelum kamu butuh kekuatan melawannya.', s:'— James Clear' },
+  { t:'Notifikasi adalah pencuri perhatian. Matikan semuanya dan ambil kembali kendalimu.', s:'— Cal Newport' },
+  { t:'Pagi yang tenang mengatur nada seluruh hari. Lima belas menit tanpa layar di pagi hari bisa mengubah segalanya.', s:'— Hal Elrod' },
+  { t:'Kamu tidak perlu motivasi untuk memulai. Kamu perlu sistem. Mulai kecil, konsisten, dan biarkan momentum bekerja.', s:'— BJ Fogg' },
+  { t:'Buat daftar "tidak boleh" yang lebih kuat dari "harus". Tahu apa yang dihindari sama pentingnya dengan tujuan.', s:'— Warren Buffett' },
+];
+
+const ALERTS = [
+  { time:'07:00', msg:'🎯 Waktunya Deep Work! HP jauh, fokus pada tugas terpenting.' },
+  { time:'09:00', msg:'☕ Istirahat 15 menit. Berdiri dan gerak!' },
+  { time:'12:00', msg:'🍽 Makan siang. Jauhkan layar!' },
+  { time:'20:00', msg:'📔 Review harianmu sekarang!' },
+  { time:'21:00', msg:'🌙 MODE MALAM! Taruh HP sekarang.' },
+  { time:'21:30', msg:'📵 HP keluar kamar. Tidur berkualitas dimulai sekarang.' },
+];
+
+// ======== STATE ========
+function todayKey() {
+  const d = new Date();
+  return `fp_${d.getFullYear()}_${d.getMonth()}_${d.getDate()}`;
+}
+
+let habitState = JSON.parse(localStorage.getItem(todayKey()) || '{}');
+let tipIdx = parseInt(localStorage.getItem('fp_tip') || '0') % TIPS.length;
+let shownAlerts = JSON.parse(localStorage.getItem('fp_alerts_' + todayKey()) || '[]');
+let timerRunning = false, timerInterval = null;
+let timerSecs = 25 * 60, isBreak = false;
+let pomoDone = 0;
+
+// ======== NAV ========
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ======== CLOCK ========
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('live-time').textContent = h + ':' + m;
+
+  const days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+  document.getElementById('live-date').textContent =
+    days[now.getDay()] + ' ' + now.getDate() + ' ' + months[now.getMonth()];
+
+  updateMode(now);
+  updateScheduleHighlight(now);
+  checkAlerts(now);
+}
+
+function updateMode(now) {
+  const h = now.getHours();
+  const banner = document.getElementById('mode-banner');
+  const emoji = document.getElementById('mode-emoji');
+  const title = document.getElementById('mode-title');
+  const sub = document.getElementById('mode-sub');
+
+  if (h >= 21 || h < 5) {
+    banner.className = 'mode-banner night';
+    emoji.textContent = '🌙';
+    title.textContent = 'Mode Malam Aktif';
+    sub.textContent = 'Letakkan HP sekarang. Istirahatkan diri.';
+  } else if (h >= 5 && h < 9) {
+    banner.className = 'mode-banner day';
+    emoji.textContent = '🌅';
+    title.textContent = 'Selamat Pagi!';
+    sub.textContent = 'Mulai dengan kebiasaan baik. Jangan buka sosmed dulu!';
+  } else if ((h >= 7 && h < 9) || (h >= 9 && h < 12) || (h >= 13 && h < 16)) {
+    banner.className = 'mode-banner day';
+    emoji.textContent = '🎯';
+    title.textContent = 'Waktu Deep Work';
+    sub.textContent = 'HP jauh, notifikasi mati. Fokus penuh!';
+  } else {
+    banner.className = 'mode-banner day';
+    emoji.textContent = '☀️';
+    title.textContent = 'Waktu Produktif';
+    const minsLeft = (21*60) - (h*60 + now.getMinutes());
+    if (minsLeft > 0) sub.textContent = 'Mode malam dalam ' + Math.floor(minsLeft/60) + 'j ' + (minsLeft%60) + 'm lagi.';
+    else sub.textContent = 'Manfaatkan sisa waktu produktifmu.';
+  }
+}
+
+// ======== HABITS ========
+function renderHabits() {
+  const wrap = document.getElementById('quick-habits');
+  wrap.innerHTML = HABITS.map(h => {
+    const done = !!habitState[h.id];
+    return `<div class="quick-habit ${done?'done':''}" onclick="toggleHabit('${h.id}')">
+      <div class="qh-check">${done?'✓':''}</div>
+      <div class="qh-text">${h.text}</div>
+    </div>`;
+  }).join('');
+  updateHabitProgress();
+}
+
+function toggleHabit(id) {
+  habitState[id] = !habitState[id];
+  localStorage.setItem(todayKey(), JSON.stringify(habitState));
+  renderHabits();
+}
+
+function updateHabitProgress() {
+  const done = HABITS.filter(h => habitState[h.id]).length;
+  const pct = Math.round(done / HABITS.length * 100);
+  document.getElementById('habit-pct').textContent = pct + '%';
+  document.getElementById('habit-count-pill') && (document.getElementById('habit-count-pill').textContent = done + '/' + HABITS.length);
+}
+
+// ======== SCHEDULE ========
+function renderSchedule() {
+  const list = document.getElementById('sched-list');
+  list.innerHTML = SCHEDULE.map((s, i) => `
+    <li class="sched-item" id="si-${i}">
+      <span class="si-time">${s.time}</span>
+      <span class="si-dot"></span>
+      <div class="si-info">
+        <div class="si-title">${s.title}</div>
+        <div class="si-desc">${s.desc}</div>
+      </div>
+      <span class="si-tag ${s.tagClass}">${s.tag}</span>
+    </li>
+  `).join('');
+}
+
+function timeToMin(t) { const [h,m] = t.split(':').map(Number); return h*60+m; }
+
+function updateScheduleHighlight(now) {
+  const cur = now.getHours()*60 + now.getMinutes();
+  let activeIdx = -1;
+  SCHEDULE.forEach((s,i) => {
+    const t = timeToMin(s.time);
+    const next = i+1 < SCHEDULE.length ? timeToMin(SCHEDULE[i+1].time) : 24*60;
+    const el = document.getElementById('si-'+i);
+    if (!el) return;
+    el.classList.remove('active','passed');
+    if (cur >= t && cur < next) { el.classList.add('active'); activeIdx = i; }
+    else if (cur >= next) el.classList.add('passed');
+  });
+  if (activeIdx >= 0) {
+    const el = document.getElementById('si-'+activeIdx);
+    if (el && document.getElementById('page-schedule').classList.contains('active'))
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+    const cb = document.getElementById('current-block');
+    if (cb) cb.textContent = '▶ ' + SCHEDULE[activeIdx].title;
+  }
+}
+
+// ======== TIPS ========
+function renderTip() {
+  const tip = TIPS[tipIdx];
+  document.getElementById('tip-text').textContent = tip.t;
+  document.getElementById('tip-src').textContent = tip.s;
+}
+
+function nextTip() {
+  tipIdx = (tipIdx+1) % TIPS.length;
+  localStorage.setItem('fp_tip', tipIdx);
+  renderTip();
+}
+
+// ======== TIMER ========
+const CIRCUMFERENCE = 2 * Math.PI * 90; // 565.49
+
+function updateTimerRing() {
+  const total = isBreak ? 5*60 : 25*60;
+  const progress = timerSecs / total;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  const ring = document.getElementById('timer-ring-fg');
+  ring.style.strokeDashoffset = offset;
+  ring.style.strokeDasharray = CIRCUMFERENCE;
+  ring.className = 'tr-fg' + (isBreak ? ' break' : '');
+}
+
+function formatTime(s) { return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+
+function toggleTimer() {
+  const btn = document.getElementById('timer-btn');
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    btn.textContent = '▶ Lanjut';
+  } else {
+    const taskVal = document.getElementById('task-input').value.trim();
+    if (taskVal) {
+      document.getElementById('task-badge-wrap').innerHTML =
+        `<div class="task-badge">🎯 ${taskVal}</div>`;
+    }
+    timerRunning = true;
+    btn.textContent = '⏸ Pause';
+    timerInterval = setInterval(() => {
+      timerSecs--;
+      document.getElementById('timer-display').textContent = formatTime(timerSecs);
+      updateTimerRing();
+      if (timerSecs <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        btn.textContent = '▶ Mulai';
+        if (!isBreak) {
+          pomoDone = Math.min(pomoDone+1, 4);
+          updatePomoDots();
+          document.getElementById('pomo-count-home').textContent = pomoDone;
+          isBreak = true; timerSecs = 5*60;
+          document.getElementById('timer-label').textContent = 'ISTIRAHAT';
+          showToast('🎉 Sesi Selesai!', 'Kerja bagus! Istirahat 5 menit. Berdiri & gerak.');
+          if (pomoDone >= 4) { pomoDone = 0; updatePomoDots(); showToast('🏆 4 Pomodoro!', 'Luar biasa! Ambil istirahat panjang 20–30 menit.'); }
+        } else {
+          isBreak = false; timerSecs = 25*60;
+          document.getElementById('timer-label').textContent = 'FOKUS';
+          document.getElementById('task-badge-wrap').innerHTML = '';
+          showToast('🎯 Waktunya Fokus!', 'Istirahat selesai. Siap untuk sesi berikutnya?');
+        }
+        document.getElementById('timer-display').textContent = formatTime(timerSecs);
+        updateTimerRing();
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  isBreak = false;
+  timerSecs = 25*60;
+  document.getElementById('timer-display').textContent = '25:00';
+  document.getElementById('timer-label').textContent = 'FOKUS';
+  document.getElementById('timer-btn').textContent = '▶ Mulai';
+  document.getElementById('task-badge-wrap').innerHTML = '';
+  updateTimerRing();
+}
+
+function updatePomoDots() {
+  const dots = document.querySelectorAll('.pomo-dot');
+  dots.forEach((d,i) => { d.classList.toggle('done', i < pomoDone); });
+}
+
+// ======== ALERTS ========
+function checkAlerts(now) {
+  const ts = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  ALERTS.forEach(a => {
+    if (a.time === ts && !shownAlerts.includes(a.time)) {
+      shownAlerts.push(a.time);
+      localStorage.setItem('fp_alerts_' + todayKey(), JSON.stringify(shownAlerts));
+      const b = document.getElementById('alert-banner');
+      document.getElementById('alert-text').textContent = a.msg;
+      b.classList.add('show');
+      setTimeout(() => b.classList.remove('show'), 8000);
+      showToast('🔔 Pengingat', a.msg);
+    }
+  });
+}
+
+let toastTimer;
+function showToast(title, msg) {
+  clearTimeout(toastTimer);
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-msg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+// ======== SERVICE WORKER ========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ======== INIT ========
+renderSchedule();
+renderHabits();
+renderTip();
+updateTimerRing();
+updateClock();
+setInterval(updateClock, 1000);
+
+setTimeout(() => {
+  const h = new Date().getHours();
+  const msg = h < 9 ? '☀️ Selamat pagi! Mulai dengan kebiasaan baik.' :
+              h < 17 ? '🎯 Tetap fokus! Kamu bisa.' :
+              h < 21 ? '🌇 Selesaikan harimu dengan baik.' :
+                       '🌙 Sudah malam. Waktunya istirahat.';
+  showToast('👋 Selamat Datang!', msg);
+}, 600);
+</script>
+</body>
+</html>
